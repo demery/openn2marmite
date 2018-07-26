@@ -1,0 +1,66 @@
+#!/usr/bin/env ruby
+
+require 'nokogiri'
+
+tei = ARGV.shift
+
+abort("Please supply a path to TEI file") unless tei
+abort("Can't find TEI file: '#{tei}'") unless File.exist? tei
+
+ns = { tei: 'http://www.tei-c.org/ns/1.0' }
+
+doc = Nokogiri::XML.parse <<-EOF
+<page>
+  <pqc>
+  </pqc>
+  <pages>
+  </pages>
+</page>
+EOF
+
+
+##
+# Extract XML from TEI
+# Map descriptive metadata
+# Map structural metadata
+#
+# Descriptive metadata:
+#
+# repository name       contributing institution?   get from collections.csv
+# holding institution   contributing institution?   get from collections.csv
+# collection name       collection name             Bibliotecha Philadelphiensis
+# source collection     collection name             msIdentifier/collection
+# call number           call number                 msIdentifier/idno/@type='call-number'
+# record URL            relation                    msIdentifier/altIdentifier[@type='resource']/idno
+# alternate identifier  (type and value)            msIdentifier/altIdentifier[@type='']/idno && msIdentifier/altIdentifier/@type
+# manuscript name       title                       titleStmt/title and first msItem
+# author                creator                     msContents/msItem/author && msContents/msItem/author/@ref
+# translator            contributor                 msItem/respStmt/resp[translator]|persName && msItem/respStmt/resp[translator]|persName/@ref
+# artist                creator                     VIAF ID?
+# former owner          provenance                  VIAF ID?
+# scribe                creator                     VIAF ID?
+# provenance details    provenance
+# date (single)         date
+# date (range)          date
+# place of origin       geographic subject
+# description           description
+# language              language
+# foliation/pagination  description
+# flyleaves & leaves    extent
+# Layout                format
+# Script                description
+# Decoration            description
+# Binding               description
+# Watermarks            description
+# Note(s)               note
+# Support material      medium                      Some are "Mixed" -- should add translation for Colenda
+# Page dimensions       format
+# Bound dimensions      format
+# related resource      relation
+# subject: keywords     subject                     Note that we have values like "16th Century" here (as in marc)
+# rights                CC0
+
+Nokogiri::XML(open(tei).read) do |xml|
+
+
+end
